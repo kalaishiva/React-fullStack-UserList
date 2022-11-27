@@ -1,6 +1,53 @@
-import React from 'react'
+import React, {useState, useEffect } from 'react';
+import axios from 'axios';
 
 const UserList = () => {
+
+  const [userData, setUserData] = useState(null);
+
+  const fetchUserData = async () => {
+    const resp = await axios.get("/getUsers");
+    console.log(resp);
+  
+
+  //if no users are there . Dont set the value
+
+if(resp.data.users.length > 0){
+  setUserData(resp.data.users)
+}
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, [userData]);
+
+  //HandleEdit
+  const handleEdit = async (user) => {
+    const userName = prompt('Please enter the name');
+    const userEmail = prompt('Please enter the email');
+
+if(!userName || !userEmail){
+  alert("Please enter both the name and the email");
+}else{
+  const resp = await axios.put(`/editUsers/${user._id}`,
+  {
+    name: userName,
+    email: userEmail,
+  } );
+  console.log(resp);
+
+}
+
+  };
+
+  //Handle Delete
+
+  const handleDelete = async(userId) => {
+    const resp = await axios.delete(`/deleteUser/${userId}`)
+    console.log(resp);
+  }
+
+
   return (
     <div className="mt-[6rem]">
          <div className="my-6">
@@ -24,24 +71,30 @@ const UserList = () => {
             </tr>
           </thead>
           <tbody>
-            <tr className="bg-gray-100 border-b  ">
-              <td className="text-base text-gray-900 font-medium px-6 py-4 whitespace-nowrap">
-                Shiva
-              </td>
-              <td className="text-base text-gray-900 font-medium px-6 py-4 whitespace-nowrap">
-                @mdo
-              </td>
-              <div className="inline-flex">
-  <button className="bg-teal-600  hover:bg-teal-700 text-white font-bold py-2 px-7 mr-2 mt-2 rounded">
-    Edit
-  </button>
-  <button className="bg-red-400 hover:bg-red-500 text-gray-800 font-bold py-2 px-4 mt-2 rounded">
-    Delete
-  </button>
-</div>
-            </tr>
+            { userData && userData.map((user)=>(
+               <tr className="bg-gray-100 border-b ">
+               <td className="text-base text-gray-900 font-medium px-6 py-4 whitespace-nowrap">
+                 {user.name}
+               </td>
+               <td className="text-base text-gray-900 font-medium px-6 py-4 whitespace-nowrap">
+                 {user.email}
+               </td>
+               <div className="inline-flex">
+   <button className="bg-teal-600  hover:bg-teal-700 text-white font-bold py-2 px-7 mr-2 mt-2 rounded" 
+   onClick={() => handleEdit(user)}>
+     Edit
+   </button>
+   <button className="bg-red-400 hover:bg-red-500 text-gray-800 font-bold py-2 px-4 mt-2 rounded"
+   onClick={() => handleDelete(user._id)}>
+     Delete
+   </button>
+ </div>
+             </tr>
 
-            <tr className="bg-white border-b">
+            ))}
+           
+
+           {/*  <tr className="bg-white border-b">
               <td className="text-base text-gray-900 font-medium px-6 py-4 whitespace-nowrap">
                 Jacob
               </td>
@@ -73,7 +126,7 @@ const UserList = () => {
     Delete
   </button>
 </div>
-            </tr>
+            </tr> */}
           </tbody>
         </table>
       </div>
